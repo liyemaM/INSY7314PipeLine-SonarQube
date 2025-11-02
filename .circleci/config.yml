@@ -1,21 +1,24 @@
 version: 2.1
 
 jobs:
-  build:
+  test:
     docker:
-      - image: cimg/node:18.17 # Node 18 image for React builds
+      - image: cimg/node:18.17
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: npm ci
       - run:
-          name: Build project
-          command: npm run build
+          name: Start server check (dry run)
+          command: node --check server.mjs
+      - run:
+          name: Run tests or placeholder
+          command: npm test
 
   sonarcloud:
     docker:
-      - image: cimg/openjdk:17.0 # SonarCloud scanner needs Java
+      - image: cimg/openjdk:17.0
     steps:
       - checkout
       - run:
@@ -32,7 +35,7 @@ jobs:
             sonar-scanner \
               -Dsonar.projectKey=liyemaM_INSY7314PipeLine-SonarQube \
               -Dsonar.organization=liyemam \
-              -Dsonar.sources=src \
+              -Dsonar.sources=. \
               -Dsonar.host.url=https://sonarcloud.io \
               -Dsonar.login=$SONAR_TOKEN
 
@@ -40,7 +43,7 @@ workflows:
   version: 2
   build_and_analyze:
     jobs:
-      - build
+      - test
       - sonarcloud:
           requires:
-            - build
+            - test

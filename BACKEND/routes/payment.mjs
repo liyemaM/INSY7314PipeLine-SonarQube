@@ -5,6 +5,13 @@ import { checkAuth } from "./user.mjs";
 
 const router = express.Router();
 
+// Exchange rates for conversion
+const exchangeRates = {
+  ZAR: 1,
+  GBP: 23.16,
+  USD: 17.18,
+};
+
 // GET all payments
 router.get("/", checkAuth, async (req, res) => {
   try {
@@ -19,15 +26,32 @@ router.get("/", checkAuth, async (req, res) => {
 // POST a new payment
 router.post("/upload", checkAuth, async (req, res) => {
   try {
-    const { name, bankName, accountNumber, swiftCode, bankLocation, amount, paymentReference } = req.body;
+    const { name, bankName, accountNumber, swiftCode, bankLocation, amount, currency, paymentReference } = req.body;
 
-    if (!name || !bankName || !accountNumber || !swiftCode || !bankLocation || !amount || !paymentReference) {
+    if (!name || !bankName || !accountNumber || !swiftCode || !bankLocation || !amount || !currency) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    const newPayment = { name, bankName, accountNumber, swiftCode, bankLocation, amount, paymentReference, createdAt: new Date() };
+    const numericAmount = parseFloat(amount);
+    const amountInZAR = numericAmount * (exchangeRates[currency] || 1);
+
+    const newPayment = {
+      name,
+      bankName,
+      accountNumber,
+      swiftCode,
+      bankLocation,
+      amount: numericAmount,
+      currency,
+      amountInZAR,
+      paymentReference,
+      status: "pending",
+      createdAt: new Date(),
+    };
+
     const collection = db.collection("payments");
     const result = await collection.insertOne(newPayment);
+
     res.status(201).json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });

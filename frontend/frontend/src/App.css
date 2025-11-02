@@ -36,3 +36,41 @@
     transform: rotate(360deg);
   }
 }
+/* App.css */
+
+:root {
+  --primary-color: white;
+  --primary-color-hover: white;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-color-hover);
+  border-color: var(--primary-color-hover);
+}
+
+.navbar .nav-link {
+  color: var(--primary-color) !important;
+  font-weight: 500;
+}
+
+.navbar .nav-link:hover {
+  color: var(--primary-color-hover) !important;
+}
+
+.table th {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #f1f1f1;
+}
+

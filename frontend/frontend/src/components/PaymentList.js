@@ -7,22 +7,15 @@ export default function PaymentsList() {
   useEffect(() => {
     async function fetchPayments() {
       try {
-        const res = await fetch("http://localhost:3001/payment/", {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/payment/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-
-        // Ensure data is an array
-        if (Array.isArray(data)) {
-          setPayments(data);
-        } else if (data && Array.isArray(data.payments)) {
-          setPayments(data.payments);
-        } else {
-          setPayments([]); // fallback
-          console.warn("Unexpected payments response:", data);
-        }
+        if (!res.ok) throw new Error(data.error || "Failed to fetch payments");
+        setPayments(data);
       } catch (err) {
         console.error(err);
+        alert(err.message);
       }
     }
     fetchPayments();
@@ -32,72 +25,65 @@ export default function PaymentsList() {
     if (!window.confirm("Are you sure you want to delete this payment?")) return;
 
     try {
-      const res = await fetch(`http://localhost:3001/payment/${id}`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/payment/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (res.ok) {
-        setPayments((prev) => prev.filter((p) => p._id !== id));
-      } else {
-        console.error("Failed to delete payment");
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to delete payment");
+      setPayments(payments.filter((p) => p._id !== id));
     } catch (err) {
       console.error(err);
+      alert(err.message);
     }
   };
 
   const formatAmount = (num) => {
     if (num == null) return "";
-    return Number(num).toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+    return Number(num).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   return (
     <div className="container mt-4">
-      <h3>All Payments</h3>
-      <table className="table table-striped mt-3">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Bank</th>
-            <th>Account Number</th>
-            <th>SWIFT</th>
-            <th>Bank Location</th>
-            <th>Amount</th>
-            <th>Reference</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {payments.map((p) => (
-            <tr key={p._id}>
-              <td>{p.name}</td>
-              <td>{p.bankName}</td>
-              <td>{p.accountNumber}</td>
-              <td>{p.swiftCode}</td>
-              <td>{p.bankLocation}</td>
-              <td>
-                {formatAmount(p.amount)} {p.currency || ""}
-                {p.currency !== "ZAR" && p.amountInZAR != null
-                  ? ` (R${formatAmount(p.amountInZAR)})`
-                  : ""}
-              </td>
-              <td>{p.paymentReference}</td>
-              <td>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => handleDelete(p._id)}
-                >
-                  Delete
-                </button>
-              </td>
+      <h3 className="mb-3">All Payments</h3>
+      <div className="table-responsive">
+        <table className="table table-striped table-bordered">
+          <thead className="table-light">
+            <tr>
+              <th>Name</th>
+              <th>Bank</th>
+              <th>Account Number</th>
+              <th>SWIFT</th>
+              <th>Bank Location</th>
+              <th>Amount</th>
+              <th>Reference</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {payments.map((p) => (
+              <tr key={p._id} style={{ border: "1px solid #ddd" }}>
+                <td>{p.name}</td>
+                <td>{p.bankName}</td>
+                <td>{p.accountNumber}</td>
+                <td>{p.swiftCode}</td>
+                <td>{p.bankLocation}</td>
+                <td>
+                  {formatAmount(p.amount)} {p.currency || "ZAR"}
+                </td>
+                <td>{p.paymentReference}</td>
+                <td>{p.status || "pending"}</td>
+                <td>
+                  <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p._id)}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

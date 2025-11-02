@@ -5,7 +5,8 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import Navbar from "./components/navbar";
 import Register from "./components/register";
 import Login from "./components/login";
-
+import EmployeeLogin from "./components/EmployeeLogin";
+import EmployeeDashboard from "./components/EmployeeDashboard";
 // Payment components
 import CreatePayment from "./components/CustomerPayment";
 import PaymentsList from "./components/PaymentList";
@@ -48,7 +49,8 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
+<Route path="/employee-login" element={<EmployeeLogin />} />
+<Route path="/employee-dashboard" element={<EmployeeDashboard />} />
         {/* Redirect unknown routes */}
         <Route path="*" element={<Navigate to={token ? "/payments-list" : "/login"} />} />
       </Routes>

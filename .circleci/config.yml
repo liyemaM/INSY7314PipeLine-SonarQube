@@ -8,13 +8,19 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: npm ci
+          command: |
+            cd BACKEND
+            npm ci
       - run:
-          name: Start server check (dry run)
-          command: node --check server.mjs
+          name: Check server syntax
+          command: |
+            cd BACKEND
+            node --check server.mjs
       - run:
-          name: Run tests or placeholder
-          command: npm test
+          name: Run placeholder tests
+          command: |
+            cd BACKEND
+            npm test
 
   sonarcloud:
     docker:
@@ -35,7 +41,7 @@ jobs:
             sonar-scanner \
               -Dsonar.projectKey=liyemaM_INSY7314PipeLine-SonarQube \
               -Dsonar.organization=liyemam \
-              -Dsonar.sources=. \
+              -Dsonar.sources=BACKEND \
               -Dsonar.host.url=https://sonarcloud.io \
               -Dsonar.login=$SONAR_TOKEN
 
